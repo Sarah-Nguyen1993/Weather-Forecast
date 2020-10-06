@@ -1,106 +1,148 @@
+//get weather info from local storage
+var citiesArray= JSON.parse(localStorage.getItem("cities")) || []
 
-//var today = localStorage.getItem("today")
-
-//when the search button is clicked
-//how to make the search works either by clicking button or hitting enter
+//this helps to hide pre-defined styles of the today div
 $("#today").hide();
 
-
-function searchBtn (){
 $("#search-btn").click(function () {
     var city = $("#input-box").val();
+    //clear the input box after each search
+    $("#input-box").val("")
+    todayWeather(city);
+    fiveDayWeather(city);
+})
+var inputBox = $("#input-box")
+// inputBox.addEventListener("submit", function () {
+//     var city = $("#input-box").val();
+//     $("#input-box").val("")
+    
+//     todayWeather(city);
+//     fiveDayWeather(city);
+// })
+
+function renderCities(){
     var cityEl = $(".city-search-history");
-    cityEl.prepend(
-        $("<button>")
-        .text(city.charAt(0).toUpperCase() + city.slice(1))
-        .addClass("city-btn")
-        .attr("data", city)
-    );
-
-    //function for today weather 
-    function todayWeather() {
-        $("#today").show();
-        var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
-        var queryURL1 = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + API_Key;
-        var todayWeatherDisplay = $("#today");
-        $.ajax({
-            url: queryURL1,
-            method: "GET"
-        }).then(function (response1) {
-            console.log(response1) // for testing
-            var todayTemp = response1.main.temp;
-            var todayHumidity = response1.main.humidity;
-            var todayWindSpeed = response1.wind.speed;
-
-            //display today weather 
-            todayWeatherDisplay.empty();
-            todayWeatherDisplay.append(
-                //city name and date
-                "<h1>" + city.charAt(0).toUpperCase() + city.slice(1) + "   " + "(" + moment().format('l') + ")",
-                //temp
-                "<p>" + "Temperature: " + todayTemp + " F",
-                //humidity
-                "<p>" + "Humidity: " + todayHumidity + " %",
-                //wind speed  
-                "<p>" + "Wind speed: " + todayWindSpeed + " mph",
-                //uv index
-            )
-        })
-        
+    cityEl.empty();
+    for (i=0; i< citiesArray.length; i++){
+        cityEl.prepend(
+            $("<button>")
+            .text(citiesArray[i].charAt(0).toUpperCase() + citiesArray[i].slice(1))
+            .addClass("city-btn")
+            .attr("data", citiesArray[i])
+        );
     }
 
-    // function for 5-day forecast
-    function fiveDayWeather() {
-        var savedCity = $("#input-box").val();
-        var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
-        var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" + API_Key;
-        var foreCast =$("#forecast");
-        $.ajax({
-            url: queryURL2,
-            method: "GET"
-        }).then(function (response2) {
-            console.log(response2) // for testing
-            console.log(queryURL2) // for testing
-
-            //display to  5-day forecast section
-            foreCast.empty();
-            foreCast.append("<h2>" + "5-Day Forecast")
-            var cardContainer = $("#forecast").append("<div class ='card-container'>")
-            var count = 1;
-            for (var i = 0; i < response2.list.length; i++) {
-                if (response2.list[i].dt_txt.indexOf("12:00:00") !== -1) {
-                    date = moment().add(count++, 'days').format('l');
-                    //console.log(response2.list[i].main.temp);
-                    //console.log(response2.list[i].main.humidity);
-                    var fiveDayWeatherDisplay = $(`
-                
-                        <div class = "card">
-                            <h6> ${date} </h6> 
-                            <p> ${response2.list[i].weather[0].description}</p>
-                            <p> Temp: ${response2.list[i].main.temp}F</p>
-                            <p> Humidity: ${response2.list[i].main.humidity}%</p>
-                        </div>
-
-                `)
-                    $(".card-container").append(fiveDayWeatherDisplay);
-                }
-
-            }
-        })
-    }
-    todayWeather();
-    fiveDayWeather();
-})
+    // when the city button is clicked, today weather and 5-day forecast are shown
+    $(".city-btn").click(function(){
+        var city = $(this).attr("data")
+        todayWeather(city);
+        fiveDayWeather(city);    
+    })
 }
-searchBtn();
+
+renderCities()
+
+function todayWeather(city) {
+    $("#today").show();
+    var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
+    var queryURL1 = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + API_Key;
+    var todayWeatherDisplay = $("#today");
+    $.ajax({
+        url: queryURL1,
+        method: "GET"
+    }).then(function (response1) {
+        console.log(response1) // for testing
+        console.log(queryURL1)
+        var todayTemp = Math.floor(response1.main.temp);
+        var todayHumidity = response1.main.humidity;
+        var todayWindSpeed = response1.wind.speed;
+        var lat = response1.coord.lat;
+        var lon = response1.coord.lon;
+        uvIndex(lat,lon);
+        //display today weather 
+        todayWeatherDisplay.empty();
+        var imgUrl = "http://openweathermap.org/img/w/" + response1.weather[0].icon+ ".png";
+        todayWeatherDisplay.append(
+            //city name + date + weather icon
+            "<h1>" + city.charAt(0).toUpperCase() + city.slice(1) 
+            + "   " + "(" + moment().format('l') + ")"
+            + "<img class ='icon'>",
+            //temp
+            "<p>" + "Temperature: " + todayTemp + " <sup>o</sup>F",
+            //humidity
+            "<p>" + "Humidity: " + todayHumidity + " %",
+            //wind speed  
+            "<p>" + "Wind speed: " + todayWindSpeed + " mph",
+            //uv index
+           // "<p>" + uvValue
+        
+        )
+        $(".icon").attr("src", imgUrl)
+        
+            
+        //store cities into the local storage
+        if (citiesArray.indexOf(city.toLowerCase()) === -1){
+            citiesArray.push(city.toLowerCase())
+            localStorage.setItem("cities", JSON.stringify(citiesArray))
+            renderCities();
+        }   
+    })   
+}
+
+function fiveDayWeather(city) {
+    var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
+    var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" + API_Key;
+    var foreCast =$("#forecast");
+    $.ajax({
+        url: queryURL2,
+        method: "GET"
+    }).then(function (response2) {
+        console.log(response2) // for testing
+        console.log(queryURL2) // for testing
+
+        //display to 5-day forecast section
+        foreCast.empty();
+        foreCast.append("<h2>" + "5-Day Forecast")
+        foreCast.append("<div class ='card-container'>")
+        var count = 1;
+        for (var i = 0; i < response2.list.length; i++) {
+            if (response2.list[i].dt_txt.indexOf("12:00:00") !== -1) {
+                date = moment().add(count++, 'days').format('l');
+                var fiveDayWeatherDisplay = $(`
+                    <div class = "card">
+                        <h6> ${date} </h6> 
+                        <img src = 'http://openweathermap.org/img/w/${response2.list[i].weather[0].icon}.png' width='50px'>
+                        <p> ${response2.list[i].weather[0].description}</p>
+                        <p> Temp: ${Math.floor(response2.list[i].main.temp)}<sup>o</sup>F</p>
+                        <p> Humidity: ${response2.list[i].main.humidity}%</p>
+                    </div>
+            `)
+            $(".card-container").append(fiveDayWeatherDisplay);
+            }
+        }
+    })
+}
+function uvIndex(lat,lon){
+    var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
+    var url = "http://api.openweathermap.org/data/2.5/uvi?appid=" + API_Key + "&lat=" + lat + "&lon=" + lon;
+    $.ajax({
+      url:url,
+      method: "GET"
+    }).then(function(response3){
+        console.log(response3);
+        var uvValue = response3.value;
+        console.log(uvValue)
+    })
+}
 
 
-$(".city-btn").click(function(){
-    console.log ("124")
-    todayWeather();
 
 
-})
+
+
+
+
+
 
 
 

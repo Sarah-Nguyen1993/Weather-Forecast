@@ -50,13 +50,14 @@ aside{
 
 
 .display{
-    margin-top:10px;
     padding:10px;
 }
 
 
 /* style for 5-day forecast */
-
+#forecast{
+    margin-top: 10px;
+}
 
 .card-container{
     display:flex;
