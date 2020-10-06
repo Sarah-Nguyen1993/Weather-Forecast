@@ -11,7 +11,7 @@ $("#search-btn").click(function () {
     todayWeather(city);
     fiveDayWeather(city);
 })
-var inputBox = $("#input-box")
+//var inputBox = $("#input-box")
 // inputBox.addEventListener("submit", function () {
 //     var city = $("#input-box").val();
 //     $("#input-box").val("")
@@ -74,8 +74,8 @@ function todayWeather(city) {
             //wind speed  
             "<p>" + "Wind speed: " + todayWindSpeed + " mph",
             //uv index
-           // "<p>" + uvValue
-        
+            "<p>" + "UV Index: " + "<span class = 'uv'>",
+            "<p class ='risk-level'>" 
         )
         $(".icon").attr("src", imgUrl)
         
@@ -131,7 +131,19 @@ function uvIndex(lat,lon){
     }).then(function(response3){
         console.log(response3);
         var uvValue = response3.value;
-        console.log(uvValue)
+        $(".uv").text(uvValue);
+       if (parseInt(uvValue) < 3){
+           $(".uv").text(uvValue).css({"backgroundColor":"green","border-radius":".25rem"}); 
+           $(".risk-level").text("Low risk").css({"color": "green", "font-style": "italic"});
+       }
+       else if(parseInt(uvValue) >= 3 && parseInt(uvValue) < 8){
+            $(".uv").text(uvValue).css({"backgroundColor": "orange", "border-radius":".25rem"});  
+            $(".risk-level").text("Moderate risk").css({"color": "orange", "font-style":"italic"})
+       }
+       else{
+        $(".uv").text(uvValue).css({"backgroundColor": "red", "border-radius":".25rem"});  
+        $(".risk-level").text("High risk").css({"color":"red", "font-style":"italic"})
+       }
     })
 }
 
