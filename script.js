@@ -117,7 +117,7 @@ function fiveDayWeather(city) {
 }
 function uvIndex(lat, lon) {
     var API_Key = "0d0f0152212d1d78d1fa67d26aa4056b";
-    var url = "http://api.openweathermap.org/data/2.5/uvi?appid=" + API_Key + "&lat=" + lat + "&lon=" + lon;
+    var url = "https://api.openweathermap.org/data/2.5/uvi?appid=" + API_Key + "&lat=" + lat + "&lon=" + lon;
     $.ajax({
         url: url,
         method: "GET"
