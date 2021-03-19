@@ -13,6 +13,12 @@ $("#search-btn").click(function (event) {
     fiveDayWeather(city);
 })
 
+$("#input-box").keyup(function(event) {
+    if (event.keyCode === 13) {
+        $("#search-btn").click();
+    }
+});
+
 function renderCities() {
     var cityEl = $(".city-search-history");
     cityEl.empty();
